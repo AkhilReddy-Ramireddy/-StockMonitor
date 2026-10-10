@@ -347,9 +347,13 @@
                         messages: [{ role: "user", content: `Fetch current quote for ${ticker} using yfinance. Return: last_price, previous_close, day_change_pct, volume. Format as JSON only.` }]
                     };
 
+                    const apiKey = localStorage.getItem('api_key') || prompt('Enter your Claude API key:');
+                    if (apiKey && apiKey !== 'undefined') {
+                        localStorage.setItem('api_key', apiKey);
+                    }
                     const response = await fetch(url, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer sk-9ee12b8ad5ea4b97-88f4fc-45b5ec4b' },
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey || ''}` },
                         body: JSON.stringify(body)
                     });
 
@@ -456,21 +460,10 @@
         }
 
         function updateTime() {
-            fetch('http://localhost:20128/v1/chat/completions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer sk-9ee12b8ad5ea4b97-88f4fc-45b5ec4b' },
-                body: JSON.stringify({
-                    model: "test01",
-                    messages: [{ role: "user", content: "Return current Eastern Time in format HH:MM AM/PM" }]
-                })
-            }).then(r => r.json()).then(d => {
-                document.getElementById('current-time').textContent = d.choices?.[0]?.message?.content || '--:--';
-                document.getElementById('last-update').textContent = `Updated: ${new Date().toLocaleTimeString()}`;
-            }).catch(() => {
-                // Fallback: use local time
-                const now = new Date();
-                document.getElementById('current-time').textContent = now.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12: true });
-            });
+            const apiKey = localStorage.getItem('api_key');
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour12: true });
+            document.getElementById('last-update').textContent = `Updated: ${new Date().toLocaleTimeString()}`;
         }
 
         // Initialize
